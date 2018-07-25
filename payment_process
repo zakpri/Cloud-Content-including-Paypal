@@ -1,44 +1,65 @@
-<div class="card-payment">
-    <h3>PayPal Pro Integration in PHP</h3>
-    <div id="paymentSection">
-        <form method="post" id="paymentForm">
-            <h4>Payable amount: $10 USD</h4>
-            <ul>
-                <li>
-                    <label for="card_number">Card number</label>
-                    <input type="text" placeholder="1234 5678 9012 3456" id="card_number" name="card_number">
-                </li>
+<?php
+//include PayPalPro PHP library
+require('PaypalPro.class.php');
+
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    //product details
+    $itemName = "Premium Project Purchase";
+    $itemNumber = "PPP123456";
+    $payableAmount = 10;
+    $currency = "EURO";
     
-                <li class="vertical">
-                    <ul>
-                        <li>
-                            <label for="expiry_month">Expiry month</label>
-                            <input type="text" placeholder="MM" maxlength="5" id="expiry_month" name="expiry_month">
-                        </li>
-                        <li>
-                            <label for="expiry_year">Expiry year</label>
-                            <input type="text" placeholder="YYYY" maxlength="5" id="expiry_year" name="expiry_year">
-                        </li>
-                        <li>
-                            <label for="cvv">CVV</label>
-                            <input type="text" placeholder="123" maxlength="3" id="cvv" name="cvv">
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <label for="name_on_card">Name on card</label>
-                    <input type="text" placeholder="Codex World" id="name_on_card" name="name_on_card">
-                </li>
-                <li>
-                    <input type="hidden" name="card_type" id="card_type" value=""/>
-                    <input type="button" name="card_submit" id="cardSubmitBtn" value="Proceed" class="payment-btn" disabled="true" >
-                </li>
-            </ul>
-        </form>
-    </div>
-    <div id="orderInfo" style="display: none;"></div>
-</div>
-//include database config file
+    //buyer information
+    $name = $_POST['name_on_card'];
+    $nameArr = explode(' ', $name);
+    $firstName = $nameArr[0];
+    $lastName = $nameArr[1];
+    $city = 'Charleston';
+    $zipcode = '25301';
+    $countryCode = 'US';
+    
+    //card details
+    $creditCardNumber = trim(str_replace(" ","",$_POST['card_number']));
+    $creditCardType = $_POST['card_type'];
+    $expMonth = $_POST['expiry_month'];
+    $expYear = $_POST['expiry_year'];
+    $cvv = $_POST['cvv'];
+    
+    //Create an instance of PaypalPro class
+    $config = array(
+        'apiUsername' => 'zahidfazal1306-facilitator_api1.gmail.com',
+        'apiPassword' => 'UC5LFSGDUH544Y4C',
+        'apiSignature' => 'AwPuxLAikr7z7OvfUilHguG.JtvdA8QCtJ9Gn55PBt61RReWvZKoh1un'
+    );
+    $paypal = new PaypalPro($config);
+    
+    //Payment details
+    $paypalParams = array(
+        'paymentAction' => 'Sale',
+        'itemName' => $itemName,
+        'itemNumber' => $itemNumber,
+        'amount' => $payableAmount,
+        'currencyCode' => $currency,
+        'creditCardType' => $creditCardType,
+        'creditCardNumber' => $creditCardNumber,
+        'expMonth' => $expMonth,
+        'expYear' => $expYear,
+        'cvv' => $cvv,
+        'firstName' => $firstName,
+        'lastName' => $lastName,
+        'city' => $city,
+        'zip'    => $zipcode,
+        'countryCode' => $countryCode,
+    );
+    $response = $paypal->paypalCall($paypalParams);
+    $paymentStatus = strtoupper($response["ACK"]);
+    if($paymentStatus == "SUCCESS"){
+        //transaction info
+        $transactionID = $response['TRANSACTIONID'];
+        $amount = $response['AMT'];
+        $date = date("Y-m-d H:i:s");
+        
+        //include database config file
         include_once 'dbConfig.php';
         
         //insert tansaction data into the database
