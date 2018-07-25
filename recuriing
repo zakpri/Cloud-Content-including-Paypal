@@ -1,0 +1,8 @@
+//Create an instance of PaypalPro class
+$config = array(
+    'apiUsername' => 'zahidfazal1306-facilitator@gmail.com',
+    'apiPassword' => 'UC5LFSGDUH544Y4C',
+    'apiSignature' => 'AwPuxLAikr7z7OvfUilHguG.JtvdA8QCtJ9Gn55PBt61RReWvZKoh1un',
+    'live' => 1
+);
+$paypal = new PaypalPro($config);
