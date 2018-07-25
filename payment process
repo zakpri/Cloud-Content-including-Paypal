@@ -1,0 +1,33 @@
+$(document).ready(function(){
+    //initiate validation on input fields
+    $('#paymentForm input[type=text]').on('keyup',function(){
+        cardFormValidate();
+    });
+    
+    //submit card form
+    $("#cardSubmitBtn").on('click',function(){
+        if (cardFormValidate()) {
+            var formData = $('#paymentForm').serialize();
+            $.ajax({
+                type:'POST',
+                url:'payment_process.php',
+                dataType: "json",
+                data:formData,
+                beforeSend: function(){  
+                    $("#cardSubmitBtn").val('Processing....');
+                },
+                success:function(data){ //console.log(data);
+                    if(data.status == 1){
+                        $('#orderInfo').html('<p>The transaction was successful. Order ID: <span>'+data.orderID+'</span></p>');
+                        $('#paymentSection').slideUp('slow');
+                        $('#orderInfo').slideDown('slow');
+                    }else{
+                        $('#orderInfo').html('<p>Transaction has been failed, please try again.</p>');
+                        $('#paymentSection').slideUp('slow');
+                        $('#orderInfo').slideDown('slow');
+                    }
+                }
+            });
+        }
+    });
+});
